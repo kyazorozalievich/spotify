@@ -1,21 +1,22 @@
 "use client";
+import { useGetMeQuery } from "@/redux/api/me";
 import scss from "./Header.module.scss";
-import Link from "next/link";
 import { FaSpotify } from "react-icons/fa";
+import Link from "next/link";
+import { CiSaveDown1 } from "react-icons/ci";
+import { useState } from "react";
+import SearchTracks from "@/components/shared/SearchTracks";
+import { GoBell, GoHome } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
 import { IoFileTrayFullOutline } from "react-icons/io5";
-import { GoHome } from "react-icons/go";
-import { useState } from "react";
-import { IoCloseOutline } from "react-icons/io5";
-import { GoBell } from "react-icons/go";
-import { useGetMeQuery } from "@/redux/api/me";
-import SearchTracks from "@/components/shared/SearchTracks";
 import { useGetPlayListQuery } from "@/redux/api/playlist";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
   const { data: session } = useGetMeQuery();
   const [close, setClose] = useState<string>("");
-  const [user, setUser] = useState<boolean>(false);
+  const [userMenuOpen, setUserMenuOpen] = useState<boolean>(false);
 
   const handleLogin = () => {
     window.open(
@@ -32,81 +33,82 @@ const Header = () => {
   };
 
   const { data: music } = useGetPlayListQuery();
-  console.log(music, 'musics');
-  
-
+  console.log(music, "musics");
   return (
     <header className={scss.Header}>
       <div className="container">
         <div className={scss.content}>
           <div className={scss.logo}>
-            <Link href={"/"}>
+            <Link href="/">
               <FaSpotify />
             </Link>
           </div>
-          <div className={scss.block}>
-            <div className={scss.home}>
-              <GoHome />
-            </div>
 
-            <div className={scss.search}>
-              <div className={scss.sear}>
-                <FiSearch />
-              </div>
+          <div className={scss.search}>
+            <button
+              onClick={() => router.push("/")}
+              className={scss.searchHomeIcon}
+            >
+              <GoHome />
+            </button>
+            <div className={scss.search_inputBlock}>
               <SearchTracks />
-              {!close.length ? (
-                <div className={scss.search_bl}>
-                  <div className={scss.slesh}></div>
-                  <div className={scss.file}>
-                    <IoFileTrayFullOutline />
-                  </div>
-                </div>
-              ) : (
-                <IoCloseOutline
-                  onClick={() => setClose("")}
-                  className={scss.close}
-                />
-              )}
+              <button className={scss.search_inputBlock__btnLeft}>
+                <FiSearch />
+              </button>
+              <button className={scss.search_inputBlock__btnRight}>
+                <div className={scss.searchLine}></div>
+                <IoFileTrayFullOutline  />
+                </button>
             </div>
           </div>
-          <div className={scss.bellAuth}>
-            <button className={scss.btn}>
+
+          <div className={scss.auth}>
+            <button
+              onClick={() =>
+                window.open("https://open.spotify.com/download", "_blank")
+              }
+            >
+              Узнать больше о Premium.
+            </button>
+            <button
+              onClick={() =>
+                window.open("https://open.spotify.com/download", "_blank")
+              }
+            >
+              <CiSaveDown1 />
+              установить приложения
+            </button>
+
+            <button className={scss.authNotation}>
               <GoBell />
             </button>
 
-            <div className={scss.auth}>
+            <div className={scss.userProfile}>
               {session ? (
                 <>
-                  <div onClick={() => setUser(true)} className={scss.user}>
-                    <h5>
-                      {session.display_name.slice(0, 1).toLocaleUpperCase()}
-                    </h5>
+                  <div
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className={scss.user}
+                  >
+                    <h5>{session.display_name.slice(0, 1).toUpperCase()}</h5>
                   </div>
 
-                  {user ? (
-                    <div onClick={() => setUser(false)} className={scss.logout}>
-                      <div className={scss.accaunt}>
-                        <h2>Аккаунт</h2>
-                      </div>
-                      <h2>Профиль</h2>
-                      <div className={scss.premium}>
-                        <h2>Переход на Premium</h2>
-                      </div>
-                      <div className={scss.setting}>
-                        <h2>Настройки</h2>
-                        <hr />
-                      </div>
-
-                      <h2 onClick={handleLogout}>Выйти</h2>
+                  {userMenuOpen && (
+                    <div className={scss.userMenu}>
+                      <h4>Аккаунт</h4>
+                      <h4>Профиль</h4>
+                      <h4>Переход на Premium</h4>
+                      <h4>Настройки</h4>
+                      <hr />
+                      <button onClick={handleLogout}>Выйти</button>
                     </div>
-                  ) : null}
+                  )}
                 </>
               ) : (
-                <>
-                  <button className={scss.login} onClick={handleLogin}>
-                    Войти
-                  </button>
-                </>
+                <button className={scss.login} onClick={handleLogin}>
+                  Войти
+                </button>
               )}
             </div>
           </div>
